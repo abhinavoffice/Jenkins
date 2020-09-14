@@ -31,14 +31,22 @@ pipeline {
             def fileData="Report_$current_time"
             //def json_File="Report_$current_time+.json"
             
-            pdfReport = "curl POST --url http://localhost:8000/api/v1/download_pdf --data 'hash=${app_hash}&scan_type=${app_type}' -H 'Authorization:${env.AUTH_KEY}' > '$fileData'.pdf"
-            sh label: 'Generate PDF', returnStdout: true, script: pdfReport
+    //        pdfReport = "curl POST --url http://localhost:8000/api/v1/download_pdf --data 'hash=${app_hash}&scan_type=${app_type}' -H 'Authorization:${env.AUTH_KEY}' > '$fileData'.pdf"
+    //        sh label: 'Generate PDF', returnStdout: true, script: pdfReport
             
-            jsonReport = "curl POST --url http://localhost:8000/api/v1/report_json --data 'hash=${app_hash}&scan_type=${app_type}' -H 'Authorization:${env.AUTH_KEY}' > '$fileData'.json"
-            sh label: 'Generate JSON', returnStdout: true, script: jsonReport
+    //        jsonReport = "curl POST --url http://localhost:8000/api/v1/report_json --data 'hash=${app_hash}&scan_type=${app_type}' -H 'Authorization:${env.AUTH_KEY}' > '$fileData'.json"
+    //        sh label: 'Generate JSON', returnStdout: true, script: jsonReport
             
-            report = "curl POST --url http://localhost:8000/api/v1/download_pdf --data 'hash=${app_hash}&scan_type=${app_type}' -H 'Authorization:${env.AUTH_KEY}' > MobSF_Scan_Report.pdf"
-            sh label: 'Generate PDF Report', returnStdout: true, script: report
+    //        report = "curl POST --url http://localhost:8000/api/v1/download_pdf --data 'hash=${app_hash}&scan_type=${app_type}' -H 'Authorization:${env.AUTH_KEY}' > MobSF_Scan_Report.pdf"
+    //        sh label: 'Generate PDF Report', returnStdout: true, script: report
+        
+        
+            sh """
+           	 curl --request POST 'http://localhost:8000/api/v1/report_json' --data 'hash=${app_hash}' --header 'Authorization:${env.AUTH_KEY}' --header 'Content-Type:application/x-www-form-urlencoded' > '$fileData'.json
+           	"""
+            sh """
+           	 curl --request POST 'http://localhost:8000/api/v1/download_pdf' --data 'hash=${app_hash}' --header 'Authorization:${env.AUTH_KEY}' --header 'Content-Type:application/x-www-form-urlencoded' > '$fileData'.pdf
+           	"""
             
             archive (includes: 'MobSF_Scan_Report.pdf')
             //archive (includes: '*.json')
