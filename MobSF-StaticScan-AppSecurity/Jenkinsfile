@@ -47,6 +47,9 @@ pipeline {
             sh """
            	 curl --request POST 'http://localhost:8000/api/v1/download_pdf' --data 'hash=${app_hash}' --header 'Authorization:${env.AUTH_KEY}' --header 'Content-Type:application/x-www-form-urlencoded' > '$fileData'.pdf
            	"""
+            sh """
+           	 curl --request POST 'http://localhost:8000/api/v1/download_pdf' --data 'hash=${app_hash}' --header 'Authorization:${env.AUTH_KEY}' --header 'Content-Type:application/x-www-form-urlencoded' > MobSF_Scan_Report.pdf
+           	"""
             
             archive (includes: 'MobSF_Scan_Report.pdf')
             //archive (includes: '*.json')
