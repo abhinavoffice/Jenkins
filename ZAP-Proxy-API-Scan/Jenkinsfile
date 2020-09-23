@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+pipeline {
+    agent any 
+    parameters {
+        choice(choices: ['zap-baseline', 'zap-full-scan', 'zap-api-scan'], description: 'Select scan type', name: 'TYPE')
+    }
+
+    stages {
+        stage('Analysis') {
+            steps {
+                script {
+                    //git credentialsId: 'ccde596e-c7e8-4e29-9cee-13de5553ca49', url: 'https://github.com/MyPOCData/ZAP-Proxy.git'
+                    def path = sh( script: "pwd", returnStdout: true).trim()
+                    echo "PATH: ${path}"
+                    def filename="${path}/api.txt"
+		            echo "FILE: $filename"
+		            def lines = readFile file:"$filename"
+		            echo "LINES: $lines"
+		            for(def line : lines.split("\n")){
+		                echo "$line"
+		                def now = new Date()
+		                def current_time=now.format("yyyy-MM-dd_HH:mm:ss", TimeZone.getTimeZone('UTC'))
+		                echo "$current_time"
+		                def new_fileName="ZAP-Scan_${current_time}.html"
+		                echo "$new_fileName"
+		                //sh '''docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable ${TYPE}.py -t "${line}" -g gen.conf -r "${new_fileName}"'''
+		                try{
+		                    sh """
+		                    docker run -v \$(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable \${TYPE}.py -t "$line" -g gen.conf -r "$new_fileName"
+		                    """
+		                }catch(Exception e){
+		                    echo "EXCEPTION--- $e"
+		                }
+		                publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '', reportFiles: '*.html', reportName: 'ZAP_Scan_Report', reportTitles: ''])
+		            }
+                }
+            }
+        }
+    }
+  } 
